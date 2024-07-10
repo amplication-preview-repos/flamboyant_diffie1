@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { Score } from "./Score";
 import { ScoreCountArgs } from "./ScoreCountArgs";
 import { ScoreFindManyArgs } from "./ScoreFindManyArgs";
@@ -22,10 +28,20 @@ import { UpdateScoreArgs } from "./UpdateScoreArgs";
 import { DeleteScoreArgs } from "./DeleteScoreArgs";
 import { User } from "../../user/base/User";
 import { ScoreService } from "../score.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => Score)
 export class ScoreResolverBase {
-  constructor(protected readonly service: ScoreService) {}
+  constructor(
+    protected readonly service: ScoreService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "Score",
+    action: "read",
+    possession: "any",
+  })
   async _scoresMeta(
     @graphql.Args() args: ScoreCountArgs
   ): Promise<MetaQueryPayload> {
@@ -35,12 +51,24 @@ export class ScoreResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [Score])
+  @nestAccessControl.UseRoles({
+    resource: "Score",
+    action: "read",
+    possession: "any",
+  })
   async scores(@graphql.Args() args: ScoreFindManyArgs): Promise<Score[]> {
     return this.service.scores(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => Score, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "Score",
+    action: "read",
+    possession: "own",
+  })
   async score(
     @graphql.Args() args: ScoreFindUniqueArgs
   ): Promise<Score | null> {
@@ -51,7 +79,13 @@ export class ScoreResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Score)
+  @nestAccessControl.UseRoles({
+    resource: "Score",
+    action: "create",
+    possession: "any",
+  })
   async createScore(@graphql.Args() args: CreateScoreArgs): Promise<Score> {
     return await this.service.createScore({
       ...args,
@@ -67,7 +101,13 @@ export class ScoreResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Score)
+  @nestAccessControl.UseRoles({
+    resource: "Score",
+    action: "update",
+    possession: "any",
+  })
   async updateScore(
     @graphql.Args() args: UpdateScoreArgs
   ): Promise<Score | null> {
@@ -95,6 +135,11 @@ export class ScoreResolverBase {
   }
 
   @graphql.Mutation(() => Score)
+  @nestAccessControl.UseRoles({
+    resource: "Score",
+    action: "delete",
+    possession: "any",
+  })
   async deleteScore(
     @graphql.Args() args: DeleteScoreArgs
   ): Promise<Score | null> {
@@ -110,9 +155,15 @@ export class ScoreResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => User, {
     nullable: true,
     name: "user",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "User",
+    action: "read",
+    possession: "any",
   })
   async getUser(@graphql.Parent() parent: Score): Promise<User | null> {
     const result = await this.service.getUser(parent.id);

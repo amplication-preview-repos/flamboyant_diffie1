@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { Player } from "./Player";
 import { PlayerCountArgs } from "./PlayerCountArgs";
 import { PlayerFindManyArgs } from "./PlayerFindManyArgs";
@@ -25,10 +31,20 @@ import { Club } from "../../club/base/Club";
 import { FriendFindManyArgs } from "../../friend/base/FriendFindManyArgs";
 import { Friend } from "../../friend/base/Friend";
 import { PlayerService } from "../player.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => Player)
 export class PlayerResolverBase {
-  constructor(protected readonly service: PlayerService) {}
+  constructor(
+    protected readonly service: PlayerService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "read",
+    possession: "any",
+  })
   async _playersMeta(
     @graphql.Args() args: PlayerCountArgs
   ): Promise<MetaQueryPayload> {
@@ -38,12 +54,24 @@ export class PlayerResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [Player])
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "read",
+    possession: "any",
+  })
   async players(@graphql.Args() args: PlayerFindManyArgs): Promise<Player[]> {
     return this.service.players(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => Player, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "read",
+    possession: "own",
+  })
   async player(
     @graphql.Args() args: PlayerFindUniqueArgs
   ): Promise<Player | null> {
@@ -54,7 +82,13 @@ export class PlayerResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Player)
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "create",
+    possession: "any",
+  })
   async createPlayer(@graphql.Args() args: CreatePlayerArgs): Promise<Player> {
     return await this.service.createPlayer({
       ...args,
@@ -62,7 +96,13 @@ export class PlayerResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Player)
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "update",
+    possession: "any",
+  })
   async updatePlayer(
     @graphql.Args() args: UpdatePlayerArgs
   ): Promise<Player | null> {
@@ -82,6 +122,11 @@ export class PlayerResolverBase {
   }
 
   @graphql.Mutation(() => Player)
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "delete",
+    possession: "any",
+  })
   async deletePlayer(
     @graphql.Args() args: DeletePlayerArgs
   ): Promise<Player | null> {
@@ -97,7 +142,13 @@ export class PlayerResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Club], { name: "clubs" })
+  @nestAccessControl.UseRoles({
+    resource: "Club",
+    action: "read",
+    possession: "any",
+  })
   async findClubs(
     @graphql.Parent() parent: Player,
     @graphql.Args() args: ClubFindManyArgs
@@ -111,7 +162,13 @@ export class PlayerResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Friend], { name: "friends" })
+  @nestAccessControl.UseRoles({
+    resource: "Friend",
+    action: "read",
+    possession: "any",
+  })
   async findFriends(
     @graphql.Parent() parent: Player,
     @graphql.Args() args: FriendFindManyArgs

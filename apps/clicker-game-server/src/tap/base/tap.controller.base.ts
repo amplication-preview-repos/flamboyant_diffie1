@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { TapService } from "../tap.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { TapCreateInput } from "./TapCreateInput";
 import { Tap } from "./Tap";
 import { TapFindManyArgs } from "./TapFindManyArgs";
 import { TapWhereUniqueInput } from "./TapWhereUniqueInput";
 import { TapUpdateInput } from "./TapUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class TapControllerBase {
-  constructor(protected readonly service: TapService) {}
+  constructor(
+    protected readonly service: TapService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Tap })
+  @nestAccessControl.UseRoles({
+    resource: "Tap",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createTap(@common.Body() data: TapCreateInput): Promise<Tap> {
     return await this.service.createTap({
       data: data,
@@ -40,9 +58,18 @@ export class TapControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Tap] })
   @ApiNestedQuery(TapFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Tap",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async taps(@common.Req() request: Request): Promise<Tap[]> {
     const args = plainToClass(TapFindManyArgs, request.query);
     return this.service.taps({
@@ -57,9 +84,18 @@ export class TapControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Tap })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Tap",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async tap(@common.Param() params: TapWhereUniqueInput): Promise<Tap | null> {
     const result = await this.service.tap({
       where: params,
@@ -79,9 +115,18 @@ export class TapControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Tap })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Tap",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateTap(
     @common.Param() params: TapWhereUniqueInput,
     @common.Body() data: TapUpdateInput
@@ -111,6 +156,14 @@ export class TapControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Tap })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Tap",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteTap(
     @common.Param() params: TapWhereUniqueInput
   ): Promise<Tap | null> {

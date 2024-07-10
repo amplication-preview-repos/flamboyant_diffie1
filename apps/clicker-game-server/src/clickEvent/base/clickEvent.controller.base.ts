@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { ClickEventService } from "../clickEvent.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { ClickEventCreateInput } from "./ClickEventCreateInput";
 import { ClickEvent } from "./ClickEvent";
 import { ClickEventFindManyArgs } from "./ClickEventFindManyArgs";
 import { ClickEventWhereUniqueInput } from "./ClickEventWhereUniqueInput";
 import { ClickEventUpdateInput } from "./ClickEventUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class ClickEventControllerBase {
-  constructor(protected readonly service: ClickEventService) {}
+  constructor(
+    protected readonly service: ClickEventService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: ClickEvent })
+  @nestAccessControl.UseRoles({
+    resource: "ClickEvent",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createClickEvent(
     @common.Body() data: ClickEventCreateInput
   ): Promise<ClickEvent> {
@@ -56,9 +74,18 @@ export class ClickEventControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [ClickEvent] })
   @ApiNestedQuery(ClickEventFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "ClickEvent",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async clickEvents(@common.Req() request: Request): Promise<ClickEvent[]> {
     const args = plainToClass(ClickEventFindManyArgs, request.query);
     return this.service.clickEvents({
@@ -79,9 +106,18 @@ export class ClickEventControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: ClickEvent })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "ClickEvent",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async clickEvent(
     @common.Param() params: ClickEventWhereUniqueInput
   ): Promise<ClickEvent | null> {
@@ -109,9 +145,18 @@ export class ClickEventControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: ClickEvent })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "ClickEvent",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateClickEvent(
     @common.Param() params: ClickEventWhereUniqueInput,
     @common.Body() data: ClickEventUpdateInput
@@ -155,6 +200,14 @@ export class ClickEventControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: ClickEvent })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "ClickEvent",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteClickEvent(
     @common.Param() params: ClickEventWhereUniqueInput
   ): Promise<ClickEvent | null> {

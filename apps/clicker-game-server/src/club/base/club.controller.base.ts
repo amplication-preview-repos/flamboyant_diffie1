@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { ClubService } from "../club.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { ClubCreateInput } from "./ClubCreateInput";
 import { Club } from "./Club";
 import { ClubFindManyArgs } from "./ClubFindManyArgs";
 import { ClubWhereUniqueInput } from "./ClubWhereUniqueInput";
 import { ClubUpdateInput } from "./ClubUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class ClubControllerBase {
-  constructor(protected readonly service: ClubService) {}
+  constructor(
+    protected readonly service: ClubService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Club })
+  @nestAccessControl.UseRoles({
+    resource: "Club",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createClub(@common.Body() data: ClubCreateInput): Promise<Club> {
     return await this.service.createClub({
       data: {
@@ -56,9 +74,18 @@ export class ClubControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Club] })
   @ApiNestedQuery(ClubFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Club",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async clubs(@common.Req() request: Request): Promise<Club[]> {
     const args = plainToClass(ClubFindManyArgs, request.query);
     return this.service.clubs({
@@ -81,9 +108,18 @@ export class ClubControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Club })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Club",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async club(
     @common.Param() params: ClubWhereUniqueInput
   ): Promise<Club | null> {
@@ -113,9 +149,18 @@ export class ClubControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Club })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Club",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateClub(
     @common.Param() params: ClubWhereUniqueInput,
     @common.Body() data: ClubUpdateInput
@@ -161,6 +206,14 @@ export class ClubControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Club })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Club",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteClub(
     @common.Param() params: ClubWhereUniqueInput
   ): Promise<Club | null> {

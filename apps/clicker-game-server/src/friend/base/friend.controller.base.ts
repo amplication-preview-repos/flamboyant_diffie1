@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { FriendService } from "../friend.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { FriendCreateInput } from "./FriendCreateInput";
 import { Friend } from "./Friend";
 import { FriendFindManyArgs } from "./FriendFindManyArgs";
 import { FriendWhereUniqueInput } from "./FriendWhereUniqueInput";
 import { FriendUpdateInput } from "./FriendUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class FriendControllerBase {
-  constructor(protected readonly service: FriendService) {}
+  constructor(
+    protected readonly service: FriendService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Friend })
+  @nestAccessControl.UseRoles({
+    resource: "Friend",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createFriend(@common.Body() data: FriendCreateInput): Promise<Friend> {
     return await this.service.createFriend({
       data: {
@@ -53,9 +71,18 @@ export class FriendControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Friend] })
   @ApiNestedQuery(FriendFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Friend",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async friends(@common.Req() request: Request): Promise<Friend[]> {
     const args = plainToClass(FriendFindManyArgs, request.query);
     return this.service.friends({
@@ -75,9 +102,18 @@ export class FriendControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Friend })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Friend",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async friend(
     @common.Param() params: FriendWhereUniqueInput
   ): Promise<Friend | null> {
@@ -104,9 +140,18 @@ export class FriendControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Friend })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Friend",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateFriend(
     @common.Param() params: FriendWhereUniqueInput,
     @common.Body() data: FriendUpdateInput
@@ -149,6 +194,14 @@ export class FriendControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Friend })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Friend",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteFriend(
     @common.Param() params: FriendWhereUniqueInput
   ): Promise<Friend | null> {

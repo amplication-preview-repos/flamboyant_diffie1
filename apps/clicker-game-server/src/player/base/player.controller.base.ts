@@ -16,7 +16,11 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { PlayerService } from "../player.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { PlayerCreateInput } from "./PlayerCreateInput";
 import { Player } from "./Player";
 import { PlayerFindManyArgs } from "./PlayerFindManyArgs";
@@ -29,10 +33,24 @@ import { FriendFindManyArgs } from "../../friend/base/FriendFindManyArgs";
 import { Friend } from "../../friend/base/Friend";
 import { FriendWhereUniqueInput } from "../../friend/base/FriendWhereUniqueInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class PlayerControllerBase {
-  constructor(protected readonly service: PlayerService) {}
+  constructor(
+    protected readonly service: PlayerService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Player })
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createPlayer(@common.Body() data: PlayerCreateInput): Promise<Player> {
     return await this.service.createPlayer({
       data: data,
@@ -51,9 +69,18 @@ export class PlayerControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Player] })
   @ApiNestedQuery(PlayerFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async players(@common.Req() request: Request): Promise<Player[]> {
     const args = plainToClass(PlayerFindManyArgs, request.query);
     return this.service.players({
@@ -73,9 +100,18 @@ export class PlayerControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Player })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async player(
     @common.Param() params: PlayerWhereUniqueInput
   ): Promise<Player | null> {
@@ -102,9 +138,18 @@ export class PlayerControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Player })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updatePlayer(
     @common.Param() params: PlayerWhereUniqueInput,
     @common.Body() data: PlayerUpdateInput
@@ -139,6 +184,14 @@ export class PlayerControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Player })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deletePlayer(
     @common.Param() params: PlayerWhereUniqueInput
   ): Promise<Player | null> {
@@ -168,8 +221,14 @@ export class PlayerControllerBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/clubs")
   @ApiNestedQuery(ClubFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Club",
+    action: "read",
+    possession: "any",
+  })
   async findClubs(
     @common.Req() request: Request,
     @common.Param() params: PlayerWhereUniqueInput
@@ -202,6 +261,11 @@ export class PlayerControllerBase {
   }
 
   @common.Post("/:id/clubs")
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "update",
+    possession: "any",
+  })
   async connectClubs(
     @common.Param() params: PlayerWhereUniqueInput,
     @common.Body() body: ClubWhereUniqueInput[]
@@ -219,6 +283,11 @@ export class PlayerControllerBase {
   }
 
   @common.Patch("/:id/clubs")
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "update",
+    possession: "any",
+  })
   async updateClubs(
     @common.Param() params: PlayerWhereUniqueInput,
     @common.Body() body: ClubWhereUniqueInput[]
@@ -236,6 +305,11 @@ export class PlayerControllerBase {
   }
 
   @common.Delete("/:id/clubs")
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "update",
+    possession: "any",
+  })
   async disconnectClubs(
     @common.Param() params: PlayerWhereUniqueInput,
     @common.Body() body: ClubWhereUniqueInput[]
@@ -252,8 +326,14 @@ export class PlayerControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/friends")
   @ApiNestedQuery(FriendFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Friend",
+    action: "read",
+    possession: "any",
+  })
   async findFriends(
     @common.Req() request: Request,
     @common.Param() params: PlayerWhereUniqueInput
@@ -283,6 +363,11 @@ export class PlayerControllerBase {
   }
 
   @common.Post("/:id/friends")
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "update",
+    possession: "any",
+  })
   async connectFriends(
     @common.Param() params: PlayerWhereUniqueInput,
     @common.Body() body: FriendWhereUniqueInput[]
@@ -300,6 +385,11 @@ export class PlayerControllerBase {
   }
 
   @common.Patch("/:id/friends")
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "update",
+    possession: "any",
+  })
   async updateFriends(
     @common.Param() params: PlayerWhereUniqueInput,
     @common.Body() body: FriendWhereUniqueInput[]
@@ -317,6 +407,11 @@ export class PlayerControllerBase {
   }
 
   @common.Delete("/:id/friends")
+  @nestAccessControl.UseRoles({
+    resource: "Player",
+    action: "update",
+    possession: "any",
+  })
   async disconnectFriends(
     @common.Param() params: PlayerWhereUniqueInput,
     @common.Body() body: FriendWhereUniqueInput[]

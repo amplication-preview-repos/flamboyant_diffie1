@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { Boost } from "./Boost";
 import { BoostCountArgs } from "./BoostCountArgs";
 import { BoostFindManyArgs } from "./BoostFindManyArgs";
@@ -21,10 +27,20 @@ import { CreateBoostArgs } from "./CreateBoostArgs";
 import { UpdateBoostArgs } from "./UpdateBoostArgs";
 import { DeleteBoostArgs } from "./DeleteBoostArgs";
 import { BoostService } from "../boost.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => Boost)
 export class BoostResolverBase {
-  constructor(protected readonly service: BoostService) {}
+  constructor(
+    protected readonly service: BoostService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "Boost",
+    action: "read",
+    possession: "any",
+  })
   async _boostsMeta(
     @graphql.Args() args: BoostCountArgs
   ): Promise<MetaQueryPayload> {
@@ -34,12 +50,24 @@ export class BoostResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [Boost])
+  @nestAccessControl.UseRoles({
+    resource: "Boost",
+    action: "read",
+    possession: "any",
+  })
   async boosts(@graphql.Args() args: BoostFindManyArgs): Promise<Boost[]> {
     return this.service.boosts(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => Boost, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "Boost",
+    action: "read",
+    possession: "own",
+  })
   async boost(
     @graphql.Args() args: BoostFindUniqueArgs
   ): Promise<Boost | null> {
@@ -50,7 +78,13 @@ export class BoostResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Boost)
+  @nestAccessControl.UseRoles({
+    resource: "Boost",
+    action: "create",
+    possession: "any",
+  })
   async createBoost(@graphql.Args() args: CreateBoostArgs): Promise<Boost> {
     return await this.service.createBoost({
       ...args,
@@ -58,7 +92,13 @@ export class BoostResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Boost)
+  @nestAccessControl.UseRoles({
+    resource: "Boost",
+    action: "update",
+    possession: "any",
+  })
   async updateBoost(
     @graphql.Args() args: UpdateBoostArgs
   ): Promise<Boost | null> {
@@ -78,6 +118,11 @@ export class BoostResolverBase {
   }
 
   @graphql.Mutation(() => Boost)
+  @nestAccessControl.UseRoles({
+    resource: "Boost",
+    action: "delete",
+    possession: "any",
+  })
   async deleteBoost(
     @graphql.Args() args: DeleteBoostArgs
   ): Promise<Boost | null> {

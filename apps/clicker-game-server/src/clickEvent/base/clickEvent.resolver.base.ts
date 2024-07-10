@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { ClickEvent } from "./ClickEvent";
 import { ClickEventCountArgs } from "./ClickEventCountArgs";
 import { ClickEventFindManyArgs } from "./ClickEventFindManyArgs";
@@ -22,10 +28,20 @@ import { UpdateClickEventArgs } from "./UpdateClickEventArgs";
 import { DeleteClickEventArgs } from "./DeleteClickEventArgs";
 import { User } from "../../user/base/User";
 import { ClickEventService } from "../clickEvent.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => ClickEvent)
 export class ClickEventResolverBase {
-  constructor(protected readonly service: ClickEventService) {}
+  constructor(
+    protected readonly service: ClickEventService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "ClickEvent",
+    action: "read",
+    possession: "any",
+  })
   async _clickEventsMeta(
     @graphql.Args() args: ClickEventCountArgs
   ): Promise<MetaQueryPayload> {
@@ -35,14 +51,26 @@ export class ClickEventResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [ClickEvent])
+  @nestAccessControl.UseRoles({
+    resource: "ClickEvent",
+    action: "read",
+    possession: "any",
+  })
   async clickEvents(
     @graphql.Args() args: ClickEventFindManyArgs
   ): Promise<ClickEvent[]> {
     return this.service.clickEvents(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => ClickEvent, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "ClickEvent",
+    action: "read",
+    possession: "own",
+  })
   async clickEvent(
     @graphql.Args() args: ClickEventFindUniqueArgs
   ): Promise<ClickEvent | null> {
@@ -53,7 +81,13 @@ export class ClickEventResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => ClickEvent)
+  @nestAccessControl.UseRoles({
+    resource: "ClickEvent",
+    action: "create",
+    possession: "any",
+  })
   async createClickEvent(
     @graphql.Args() args: CreateClickEventArgs
   ): Promise<ClickEvent> {
@@ -71,7 +105,13 @@ export class ClickEventResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => ClickEvent)
+  @nestAccessControl.UseRoles({
+    resource: "ClickEvent",
+    action: "update",
+    possession: "any",
+  })
   async updateClickEvent(
     @graphql.Args() args: UpdateClickEventArgs
   ): Promise<ClickEvent | null> {
@@ -99,6 +139,11 @@ export class ClickEventResolverBase {
   }
 
   @graphql.Mutation(() => ClickEvent)
+  @nestAccessControl.UseRoles({
+    resource: "ClickEvent",
+    action: "delete",
+    possession: "any",
+  })
   async deleteClickEvent(
     @graphql.Args() args: DeleteClickEventArgs
   ): Promise<ClickEvent | null> {
@@ -114,9 +159,15 @@ export class ClickEventResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => User, {
     nullable: true,
     name: "user",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "User",
+    action: "read",
+    possession: "any",
   })
   async getUser(@graphql.Parent() parent: ClickEvent): Promise<User | null> {
     const result = await this.service.getUser(parent.id);

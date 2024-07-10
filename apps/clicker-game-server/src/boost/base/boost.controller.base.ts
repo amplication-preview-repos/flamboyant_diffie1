@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { BoostService } from "../boost.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { BoostCreateInput } from "./BoostCreateInput";
 import { Boost } from "./Boost";
 import { BoostFindManyArgs } from "./BoostFindManyArgs";
 import { BoostWhereUniqueInput } from "./BoostWhereUniqueInput";
 import { BoostUpdateInput } from "./BoostUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class BoostControllerBase {
-  constructor(protected readonly service: BoostService) {}
+  constructor(
+    protected readonly service: BoostService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Boost })
+  @nestAccessControl.UseRoles({
+    resource: "Boost",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createBoost(@common.Body() data: BoostCreateInput): Promise<Boost> {
     return await this.service.createBoost({
       data: data,
@@ -42,9 +60,18 @@ export class BoostControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Boost] })
   @ApiNestedQuery(BoostFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Boost",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async boosts(@common.Req() request: Request): Promise<Boost[]> {
     const args = plainToClass(BoostFindManyArgs, request.query);
     return this.service.boosts({
@@ -61,9 +88,18 @@ export class BoostControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Boost })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Boost",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async boost(
     @common.Param() params: BoostWhereUniqueInput
   ): Promise<Boost | null> {
@@ -87,9 +123,18 @@ export class BoostControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Boost })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Boost",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateBoost(
     @common.Param() params: BoostWhereUniqueInput,
     @common.Body() data: BoostUpdateInput
@@ -121,6 +166,14 @@ export class BoostControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Boost })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Boost",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteBoost(
     @common.Param() params: BoostWhereUniqueInput
   ): Promise<Boost | null> {

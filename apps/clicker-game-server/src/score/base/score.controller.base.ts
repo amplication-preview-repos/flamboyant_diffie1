@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { ScoreService } from "../score.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { ScoreCreateInput } from "./ScoreCreateInput";
 import { Score } from "./Score";
 import { ScoreFindManyArgs } from "./ScoreFindManyArgs";
 import { ScoreWhereUniqueInput } from "./ScoreWhereUniqueInput";
 import { ScoreUpdateInput } from "./ScoreUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class ScoreControllerBase {
-  constructor(protected readonly service: ScoreService) {}
+  constructor(
+    protected readonly service: ScoreService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Score })
+  @nestAccessControl.UseRoles({
+    resource: "Score",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createScore(@common.Body() data: ScoreCreateInput): Promise<Score> {
     return await this.service.createScore({
       data: {
@@ -54,9 +72,18 @@ export class ScoreControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Score] })
   @ApiNestedQuery(ScoreFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Score",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async scores(@common.Req() request: Request): Promise<Score[]> {
     const args = plainToClass(ScoreFindManyArgs, request.query);
     return this.service.scores({
@@ -77,9 +104,18 @@ export class ScoreControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Score })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Score",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async score(
     @common.Param() params: ScoreWhereUniqueInput
   ): Promise<Score | null> {
@@ -107,9 +143,18 @@ export class ScoreControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Score })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Score",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateScore(
     @common.Param() params: ScoreWhereUniqueInput,
     @common.Body() data: ScoreUpdateInput
@@ -153,6 +198,14 @@ export class ScoreControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Score })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Score",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteScore(
     @common.Param() params: ScoreWhereUniqueInput
   ): Promise<Score | null> {
