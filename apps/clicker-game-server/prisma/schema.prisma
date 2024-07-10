@@ -7,6 +7,15 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Task {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String?
+  description String?
+  rewardCoins Int?
+}
+
 model Club {
   id             String   @id @default(cuid())
   createdAt      DateTime @default(now())
@@ -43,13 +52,14 @@ model Player {
   friends            Friend[]
 }
 
-model Task {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  name        String?
-  description String?
-  rewardCoins Int?
+model Boost {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  name            String?
+  description     String?
+  boostMultiplier Float?
+  durationSeconds Int?
 }
 
 model Tap {
@@ -60,12 +70,50 @@ model Tap {
   earnings  Int?
 }
 
-model Boost {
-  id              String   @id @default(cuid())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  name            String?
-  description     String?
-  boostMultiplier Float?
-  durationSeconds Int?
+model Score {
+  id         String    @id @default(cuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  scoreValue Int?
+  earnedAt   DateTime?
+  user       User?     @relation(fields: [userId], references: [id])
+  userId     String?
+}
+
+model Item {
+  id        String            @id @default(cuid())
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  itemName  String?
+  itemType  EnumItemItemType?
+}
+
+model ClickEvent {
+  id         String    @id @default(cuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  clickCount Int?
+  clickedAt  DateTime?
+  user       User?     @relation(fields: [userId], references: [id])
+  userId     String?
+}
+
+model User {
+  id          String       @id @default(cuid())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  firstName   String?
+  lastName    String?
+  username    String       @unique
+  email       String?      @unique
+  password    String
+  roles       Json
+  totalClicks Int?
+  lastLogin   DateTime?
+  scores      Score[]
+  clickEvents ClickEvent[]
+}
+
+enum EnumItemItemType {
+  Option1
 }

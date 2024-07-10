@@ -1,10 +1,14 @@
 import { Module } from "@nestjs/common";
+import { TaskModule } from "./task/task.module";
 import { ClubModule } from "./club/club.module";
 import { FriendModule } from "./friend/friend.module";
 import { PlayerModule } from "./player/player.module";
-import { TaskModule } from "./task/task.module";
-import { TapModule } from "./tap/tap.module";
 import { BoostModule } from "./boost/boost.module";
+import { TapModule } from "./tap/tap.module";
+import { ScoreModule } from "./score/score.module";
+import { ItemModule } from "./item/item.module";
+import { ClickEventModule } from "./clickEvent/clickEvent.module";
+import { UserModule } from "./user/user.module";
 import { BoostManagementModule } from "./BoostManagement/boostmanagement.module";
 import { ClubManagementModule } from "./ClubManagement/clubmanagement.module";
 import { PlayerManagementModule } from "./PlayerManagement/playermanagement.module";
@@ -14,6 +18,7 @@ import { TaskManagementModule } from "./TaskManagement/taskmanagement.module";
 import { HealthModule } from "./health/health.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { SecretsManagerModule } from "./providers/secrets/secretsManager.module";
+import { KafkaModule } from "./kafka/kafka.module";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { ServeStaticOptionsService } from "./serveStaticOptions.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
@@ -23,12 +28,17 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 @Module({
   controllers: [],
   imports: [
+    KafkaModule,
+    TaskModule,
     ClubModule,
     FriendModule,
     PlayerModule,
-    TaskModule,
-    TapModule,
     BoostModule,
+    TapModule,
+    ScoreModule,
+    ItemModule,
+    ClickEventModule,
+    UserModule,
     BoostManagementModule,
     ClubManagementModule,
     PlayerManagementModule,

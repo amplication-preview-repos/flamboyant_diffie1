@@ -5,6 +5,10 @@ import { theme } from "./theme/theme";
 import Login from "./Login";
 import "./App.scss";
 import Dashboard from "./pages/Dashboard";
+import { TaskList } from "./task/TaskList";
+import { TaskCreate } from "./task/TaskCreate";
+import { TaskEdit } from "./task/TaskEdit";
+import { TaskShow } from "./task/TaskShow";
 import { ClubList } from "./club/ClubList";
 import { ClubCreate } from "./club/ClubCreate";
 import { ClubEdit } from "./club/ClubEdit";
@@ -17,18 +21,30 @@ import { PlayerList } from "./player/PlayerList";
 import { PlayerCreate } from "./player/PlayerCreate";
 import { PlayerEdit } from "./player/PlayerEdit";
 import { PlayerShow } from "./player/PlayerShow";
-import { TaskList } from "./task/TaskList";
-import { TaskCreate } from "./task/TaskCreate";
-import { TaskEdit } from "./task/TaskEdit";
-import { TaskShow } from "./task/TaskShow";
-import { TapList } from "./tap/TapList";
-import { TapCreate } from "./tap/TapCreate";
-import { TapEdit } from "./tap/TapEdit";
-import { TapShow } from "./tap/TapShow";
 import { BoostList } from "./boost/BoostList";
 import { BoostCreate } from "./boost/BoostCreate";
 import { BoostEdit } from "./boost/BoostEdit";
 import { BoostShow } from "./boost/BoostShow";
+import { TapList } from "./tap/TapList";
+import { TapCreate } from "./tap/TapCreate";
+import { TapEdit } from "./tap/TapEdit";
+import { TapShow } from "./tap/TapShow";
+import { ScoreList } from "./score/ScoreList";
+import { ScoreCreate } from "./score/ScoreCreate";
+import { ScoreEdit } from "./score/ScoreEdit";
+import { ScoreShow } from "./score/ScoreShow";
+import { ItemList } from "./item/ItemList";
+import { ItemCreate } from "./item/ItemCreate";
+import { ItemEdit } from "./item/ItemEdit";
+import { ItemShow } from "./item/ItemShow";
+import { ClickEventList } from "./clickEvent/ClickEventList";
+import { ClickEventCreate } from "./clickEvent/ClickEventCreate";
+import { ClickEventEdit } from "./clickEvent/ClickEventEdit";
+import { ClickEventShow } from "./clickEvent/ClickEventShow";
+import { UserList } from "./user/UserList";
+import { UserCreate } from "./user/UserCreate";
+import { UserEdit } from "./user/UserEdit";
+import { UserShow } from "./user/UserShow";
 import { jwtAuthProvider } from "./auth-provider/ra-auth-jwt";
 
 const App = (): React.ReactElement => {
@@ -56,6 +72,13 @@ const App = (): React.ReactElement => {
         loginPage={Login}
       >
         <Resource
+          name="Task"
+          list={TaskList}
+          edit={TaskEdit}
+          create={TaskCreate}
+          show={TaskShow}
+        />
+        <Resource
           name="Club"
           list={ClubList}
           edit={ClubEdit}
@@ -77,11 +100,11 @@ const App = (): React.ReactElement => {
           show={PlayerShow}
         />
         <Resource
-          name="Task"
-          list={TaskList}
-          edit={TaskEdit}
-          create={TaskCreate}
-          show={TaskShow}
+          name="Boost"
+          list={BoostList}
+          edit={BoostEdit}
+          create={BoostCreate}
+          show={BoostShow}
         />
         <Resource
           name="Tap"
@@ -91,11 +114,32 @@ const App = (): React.ReactElement => {
           show={TapShow}
         />
         <Resource
-          name="Boost"
-          list={BoostList}
-          edit={BoostEdit}
-          create={BoostCreate}
-          show={BoostShow}
+          name="Score"
+          list={ScoreList}
+          edit={ScoreEdit}
+          create={ScoreCreate}
+          show={ScoreShow}
+        />
+        <Resource
+          name="Item"
+          list={ItemList}
+          edit={ItemEdit}
+          create={ItemCreate}
+          show={ItemShow}
+        />
+        <Resource
+          name="ClickEvent"
+          list={ClickEventList}
+          edit={ClickEventEdit}
+          create={ClickEventCreate}
+          show={ClickEventShow}
+        />
+        <Resource
+          name="User"
+          list={UserList}
+          edit={UserEdit}
+          create={UserCreate}
+          show={UserShow}
         />
       </Admin>
     </div>
