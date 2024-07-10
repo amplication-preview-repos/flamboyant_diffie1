@@ -12,4 +12,5 @@ export type UserOrderByInput = {
   roles?: SortOrder;
   totalClicks?: SortOrder;
   lastLogin?: SortOrder;
+  role?: SortOrder;
 };

@@ -10,6 +10,7 @@ import {
   NumberInput,
   DateTimeInput,
   ReferenceArrayInput,
+  SelectInput,
 } from "react-admin";
 
 import { ScoreTitle } from "../score/ScoreTitle";
@@ -49,6 +50,14 @@ export const UserCreate = (props: CreateProps): React.ReactElement => {
         >
           <SelectArrayInput optionText={ClickEventTitle} />
         </ReferenceArrayInput>
+        <SelectInput
+          source="role"
+          label="role"
+          choices={[{ label: "Option 1", value: "Option1" }]}
+          optionText="label"
+          allowEmpty
+          optionValue="value"
+        />
       </SimpleForm>
     </Create>
   );

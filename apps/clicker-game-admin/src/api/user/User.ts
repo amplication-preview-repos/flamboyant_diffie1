@@ -15,4 +15,5 @@ export type User = {
   lastLogin: Date | null;
   scores?: Array<Score>;
   clickEvents?: Array<ClickEvent>;
+  role?: "Option1" | null;
 };

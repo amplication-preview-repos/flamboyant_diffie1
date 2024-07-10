@@ -13,12 +13,13 @@ import { InputType, Field } from "@nestjs/graphql";
 import { ApiProperty } from "@nestjs/swagger";
 import { StringFilter } from "../../util/StringFilter";
 import { Type } from "class-transformer";
-import { IsOptional, ValidateNested } from "class-validator";
+import { IsOptional, ValidateNested, IsEnum } from "class-validator";
 import { StringNullableFilter } from "../../util/StringNullableFilter";
 import { IntNullableFilter } from "../../util/IntNullableFilter";
 import { DateTimeNullableFilter } from "../../util/DateTimeNullableFilter";
 import { ScoreListRelationFilter } from "../../score/base/ScoreListRelationFilter";
 import { ClickEventListRelationFilter } from "../../clickEvent/base/ClickEventListRelationFilter";
+import { EnumUserRole } from "./EnumUserRole";
 
 @InputType()
 class UserWhereInput {
@@ -122,6 +123,17 @@ class UserWhereInput {
     nullable: true,
   })
   clickEvents?: ClickEventListRelationFilter;
+
+  @ApiProperty({
+    required: false,
+    enum: EnumUserRole,
+  })
+  @IsEnum(EnumUserRole)
+  @IsOptional()
+  @Field(() => EnumUserRole, {
+    nullable: true,
+  })
+  role?: "Option1";
 }
 
 export { UserWhereInput as UserWhereInput };

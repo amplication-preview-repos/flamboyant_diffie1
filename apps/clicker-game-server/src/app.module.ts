@@ -12,12 +12,12 @@ import {
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
-import { TaskModule } from "./task/task.module";
 import { ClubModule } from "./club/club.module";
 import { FriendModule } from "./friend/friend.module";
 import { PlayerModule } from "./player/player.module";
-import { BoostModule } from "./boost/boost.module";
+import { TaskModule } from "./task/task.module";
 import { TapModule } from "./tap/tap.module";
+import { BoostModule } from "./boost/boost.module";
 import { ScoreModule } from "./score/score.module";
 import { ItemModule } from "./item/item.module";
 import { ClickEventModule } from "./clickEvent/clickEvent.module";
@@ -50,12 +50,12 @@ import { AuthModule } from "./auth/auth.module";
     AuthModule,
     KafkaModule,
     LoggerModule,
-    TaskModule,
     ClubModule,
     FriendModule,
     PlayerModule,
-    BoostModule,
+    TaskModule,
     TapModule,
+    BoostModule,
     ScoreModule,
     ItemModule,
     ClickEventModule,

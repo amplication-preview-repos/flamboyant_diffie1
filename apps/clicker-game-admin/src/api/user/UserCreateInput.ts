@@ -13,4 +13,5 @@ export type UserCreateInput = {
   lastLogin?: Date | null;
   scores?: ScoreCreateNestedManyWithoutUsersInput;
   clickEvents?: ClickEventCreateNestedManyWithoutUsersInput;
+  role?: "Option1" | null;
 };

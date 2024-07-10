@@ -13,4 +13,5 @@ export type UserUpdateInput = {
   lastLogin?: Date | null;
   scores?: ScoreUpdateManyWithoutUsersInput;
   clickEvents?: ClickEventUpdateManyWithoutUsersInput;
+  role?: "Option1" | null;
 };

@@ -7,15 +7,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Task {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  name        String?
-  description String?
-  rewardCoins Int?
-}
-
 model Club {
   id             String   @id @default(cuid())
   createdAt      DateTime @default(now())
@@ -52,14 +43,13 @@ model Player {
   friends            Friend[]
 }
 
-model Boost {
-  id              String   @id @default(cuid())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  name            String?
-  description     String?
-  boostMultiplier Float?
-  durationSeconds Int?
+model Task {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String?
+  description String?
+  rewardCoins Int?
 }
 
 model Tap {
@@ -68,6 +58,16 @@ model Tap {
   updatedAt DateTime @updatedAt
   tapCount  Int?
   earnings  Int?
+}
+
+model Boost {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  name            String?
+  description     String?
+  boostMultiplier Float?
+  durationSeconds Int?
 }
 
 model Score {
@@ -99,21 +99,26 @@ model ClickEvent {
 }
 
 model User {
-  id          String       @id @default(cuid())
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   firstName   String?
   lastName    String?
-  username    String       @unique
-  email       String?      @unique
+  username    String        @unique
+  email       String?       @unique
   password    String
   roles       Json
   totalClicks Int?
   lastLogin   DateTime?
   scores      Score[]
   clickEvents ClickEvent[]
+  role        EnumUserRole?
 }
 
 enum EnumItemItemType {
+  Option1
+}
+
+enum EnumUserRole {
   Option1
 }

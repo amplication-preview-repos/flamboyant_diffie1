@@ -1,36 +1,6 @@
 [
   {
     "role": "user",
-    "resource": "Task",
-    "action": "read:own",
-    "attributes": "*"
-  },
-  {
-    "role": "user",
-    "resource": "Task",
-    "action": "create:any",
-    "attributes": "*"
-  },
-  {
-    "role": "user",
-    "resource": "Task",
-    "action": "update:any",
-    "attributes": "*"
-  },
-  {
-    "role": "user",
-    "resource": "Task",
-    "action": "delete:any",
-    "attributes": "*"
-  },
-  {
-    "role": "user",
-    "resource": "Task",
-    "action": "read:any",
-    "attributes": "*"
-  },
-  {
-    "role": "user",
     "resource": "Club",
     "action": "read:own",
     "attributes": "*"
@@ -121,31 +91,31 @@
   },
   {
     "role": "user",
-    "resource": "Boost",
+    "resource": "Task",
     "action": "read:own",
     "attributes": "*"
   },
   {
     "role": "user",
-    "resource": "Boost",
+    "resource": "Task",
     "action": "create:any",
     "attributes": "*"
   },
   {
     "role": "user",
-    "resource": "Boost",
+    "resource": "Task",
     "action": "update:any",
     "attributes": "*"
   },
   {
     "role": "user",
-    "resource": "Boost",
+    "resource": "Task",
     "action": "delete:any",
     "attributes": "*"
   },
   {
     "role": "user",
-    "resource": "Boost",
+    "resource": "Task",
     "action": "read:any",
     "attributes": "*"
   },
@@ -176,6 +146,36 @@
   {
     "role": "user",
     "resource": "Tap",
+    "action": "read:any",
+    "attributes": "*"
+  },
+  {
+    "role": "user",
+    "resource": "Boost",
+    "action": "read:own",
+    "attributes": "*"
+  },
+  {
+    "role": "user",
+    "resource": "Boost",
+    "action": "create:any",
+    "attributes": "*"
+  },
+  {
+    "role": "user",
+    "resource": "Boost",
+    "action": "update:any",
+    "attributes": "*"
+  },
+  {
+    "role": "user",
+    "resource": "Boost",
+    "action": "delete:any",
+    "attributes": "*"
+  },
+  {
+    "role": "user",
+    "resource": "Boost",
     "action": "read:any",
     "attributes": "*"
   },

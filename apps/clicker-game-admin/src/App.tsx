@@ -5,10 +5,6 @@ import { theme } from "./theme/theme";
 import Login from "./Login";
 import "./App.scss";
 import Dashboard from "./pages/Dashboard";
-import { TaskList } from "./task/TaskList";
-import { TaskCreate } from "./task/TaskCreate";
-import { TaskEdit } from "./task/TaskEdit";
-import { TaskShow } from "./task/TaskShow";
 import { ClubList } from "./club/ClubList";
 import { ClubCreate } from "./club/ClubCreate";
 import { ClubEdit } from "./club/ClubEdit";
@@ -21,14 +17,18 @@ import { PlayerList } from "./player/PlayerList";
 import { PlayerCreate } from "./player/PlayerCreate";
 import { PlayerEdit } from "./player/PlayerEdit";
 import { PlayerShow } from "./player/PlayerShow";
-import { BoostList } from "./boost/BoostList";
-import { BoostCreate } from "./boost/BoostCreate";
-import { BoostEdit } from "./boost/BoostEdit";
-import { BoostShow } from "./boost/BoostShow";
+import { TaskList } from "./task/TaskList";
+import { TaskCreate } from "./task/TaskCreate";
+import { TaskEdit } from "./task/TaskEdit";
+import { TaskShow } from "./task/TaskShow";
 import { TapList } from "./tap/TapList";
 import { TapCreate } from "./tap/TapCreate";
 import { TapEdit } from "./tap/TapEdit";
 import { TapShow } from "./tap/TapShow";
+import { BoostList } from "./boost/BoostList";
+import { BoostCreate } from "./boost/BoostCreate";
+import { BoostEdit } from "./boost/BoostEdit";
+import { BoostShow } from "./boost/BoostShow";
 import { ScoreList } from "./score/ScoreList";
 import { ScoreCreate } from "./score/ScoreCreate";
 import { ScoreEdit } from "./score/ScoreEdit";
@@ -72,13 +72,6 @@ const App = (): React.ReactElement => {
         loginPage={Login}
       >
         <Resource
-          name="Task"
-          list={TaskList}
-          edit={TaskEdit}
-          create={TaskCreate}
-          show={TaskShow}
-        />
-        <Resource
           name="Club"
           list={ClubList}
           edit={ClubEdit}
@@ -100,11 +93,11 @@ const App = (): React.ReactElement => {
           show={PlayerShow}
         />
         <Resource
-          name="Boost"
-          list={BoostList}
-          edit={BoostEdit}
-          create={BoostCreate}
-          show={BoostShow}
+          name="Task"
+          list={TaskList}
+          edit={TaskEdit}
+          create={TaskCreate}
+          show={TaskShow}
         />
         <Resource
           name="Tap"
@@ -112,6 +105,13 @@ const App = (): React.ReactElement => {
           edit={TapEdit}
           create={TapCreate}
           show={TapShow}
+        />
+        <Resource
+          name="Boost"
+          list={BoostList}
+          edit={BoostEdit}
+          create={BoostCreate}
+          show={BoostShow}
         />
         <Resource
           name="Score"

@@ -20,6 +20,7 @@ import {
 
 import { PasswordService } from "../../auth/password.service";
 import { transformStringFieldUpdateInput } from "../../prisma.util";
+import { CreateAdminUserInput } from "../CreateAdminUserInput";
 
 export class UserServiceBase {
   constructor(
@@ -87,5 +88,8 @@ export class UserServiceBase {
         where: { id: parentId },
       })
       .clickEvents(args);
+  }
+  async CreateAdminUser(args: CreateAdminUserInput): Promise<string> {
+    throw new Error("Not implemented");
   }
 }

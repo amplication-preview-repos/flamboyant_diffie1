@@ -11,6 +11,7 @@ https://docs.amplication.com/how-to/custom-code
   */
 import { InputType, Field } from "@nestjs/graphql";
 import { ApiProperty } from "@nestjs/swagger";
+
 import {
   IsString,
   MaxLength,
@@ -20,13 +21,16 @@ import {
   Max,
   IsDate,
   ValidateNested,
+  IsEnum,
 } from "class-validator";
+
 import { IsJSONValue } from "../../validators";
 import { GraphQLJSON } from "graphql-type-json";
 import { InputJsonValue } from "../../types";
 import { Type } from "class-transformer";
 import { ScoreUpdateManyWithoutUsersInput } from "./ScoreUpdateManyWithoutUsersInput";
 import { ClickEventUpdateManyWithoutUsersInput } from "./ClickEventUpdateManyWithoutUsersInput";
+import { EnumUserRole } from "./EnumUserRole";
 
 @InputType()
 class UserUpdateInput {
@@ -144,6 +148,17 @@ class UserUpdateInput {
     nullable: true,
   })
   clickEvents?: ClickEventUpdateManyWithoutUsersInput;
+
+  @ApiProperty({
+    required: false,
+    enum: EnumUserRole,
+  })
+  @IsEnum(EnumUserRole)
+  @IsOptional()
+  @Field(() => EnumUserRole, {
+    nullable: true,
+  })
+  role?: "Option1" | null;
 }
 
 export { UserUpdateInput as UserUpdateInput };

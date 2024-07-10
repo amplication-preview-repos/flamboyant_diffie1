@@ -30,6 +30,7 @@ import { ScoreFindManyArgs } from "../../score/base/ScoreFindManyArgs";
 import { Score } from "../../score/base/Score";
 import { ClickEventFindManyArgs } from "../../clickEvent/base/ClickEventFindManyArgs";
 import { ClickEvent } from "../../clickEvent/base/ClickEvent";
+import { CreateAdminUserInput } from "../CreateAdminUserInput";
 import { UserService } from "../user.service";
 @common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => User)
@@ -174,5 +175,13 @@ export class UserResolverBase {
     }
 
     return results;
+  }
+
+  @graphql.Mutation(() => String)
+  async CreateAdminUser(
+    @graphql.Args()
+    args: CreateAdminUserInput
+  ): Promise<string> {
+    return this.service.CreateAdminUser(args);
   }
 }

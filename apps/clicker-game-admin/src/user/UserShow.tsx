@@ -27,6 +27,7 @@ export const UserShow = (props: ShowProps): React.ReactElement => {
         <TextField label="Roles" source="roles" />
         <TextField label="totalClicks" source="totalClicks" />
         <TextField label="lastLogin" source="lastLogin" />
+        <TextField label="role" source="role" />
         <ReferenceManyField reference="Score" target="userId" label="Scores">
           <Datagrid rowClick="show">
             <TextField label="ID" source="id" />

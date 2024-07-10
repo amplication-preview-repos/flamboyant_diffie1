@@ -15,4 +15,5 @@ export type UserWhereInput = {
   lastLogin?: DateTimeNullableFilter;
   scores?: ScoreListRelationFilter;
   clickEvents?: ClickEventListRelationFilter;
+  role?: "Option1";
 };

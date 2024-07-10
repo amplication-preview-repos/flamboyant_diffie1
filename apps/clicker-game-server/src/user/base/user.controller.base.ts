@@ -32,6 +32,7 @@ import { ScoreWhereUniqueInput } from "../../score/base/ScoreWhereUniqueInput";
 import { ClickEventFindManyArgs } from "../../clickEvent/base/ClickEventFindManyArgs";
 import { ClickEvent } from "../../clickEvent/base/ClickEvent";
 import { ClickEventWhereUniqueInput } from "../../clickEvent/base/ClickEventWhereUniqueInput";
+import { CreateAdminUserInput } from "../CreateAdminUserInput";
 
 @swagger.ApiBearerAuth()
 @common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
@@ -65,6 +66,7 @@ export class UserControllerBase {
         roles: true,
         totalClicks: true,
         lastLogin: true,
+        role: true,
       },
     });
   }
@@ -96,6 +98,7 @@ export class UserControllerBase {
         roles: true,
         totalClicks: true,
         lastLogin: true,
+        role: true,
       },
     });
   }
@@ -128,6 +131,7 @@ export class UserControllerBase {
         roles: true,
         totalClicks: true,
         lastLogin: true,
+        role: true,
       },
     });
     if (result === null) {
@@ -169,6 +173,7 @@ export class UserControllerBase {
           roles: true,
           totalClicks: true,
           lastLogin: true,
+          role: true,
         },
       });
     } catch (error) {
@@ -209,6 +214,7 @@ export class UserControllerBase {
           roles: true,
           totalClicks: true,
           lastLogin: true,
+          role: true,
         },
       });
     } catch (error) {
@@ -425,5 +431,22 @@ export class UserControllerBase {
       data,
       select: { id: true },
     });
+  }
+
+  @common.Post("/admin/register")
+  @swagger.ApiOkResponse({
+    type: String,
+  })
+  @swagger.ApiNotFoundResponse({
+    type: errors.NotFoundException,
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
+  async CreateAdminUser(
+    @common.Body()
+    body: CreateAdminUserInput
+  ): Promise<string> {
+    return this.service.CreateAdminUser(body);
   }
 }
