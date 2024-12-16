@@ -1,0 +1,124 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Club {
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  name           String?
+  description    String?
+  membershipCost Int?
+  boostRate      Float?
+  player         Player?  @relation(fields: [playerId], references: [id])
+  playerId       String?
+}
+
+model Friend {
+  id                 String   @id @default(cuid())
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  earningsPercentage Float?
+  player             Player?  @relation(fields: [playerId], references: [id])
+  playerId           String?
+}
+
+model Player {
+  id                 String   @id @default(cuid())
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  email              String?
+  password           String?
+  coins              Int?
+  energyRechargeRate Float?
+  tapValue           Int?
+  username           String?
+  energy             Int?
+  clubs              Club[]
+  friends            Friend[]
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String?
+  description String?
+  rewardCoins Int?
+}
+
+model Tap {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tapCount  Int?
+  earnings  Int?
+}
+
+model Boost {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  name            String?
+  description     String?
+  boostMultiplier Float?
+  durationSeconds Int?
+}
+
+model Score {
+  id         String    @id @default(cuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  scoreValue Int?
+  earnedAt   DateTime?
+  user       User?     @relation(fields: [userId], references: [id])
+  userId     String?
+}
+
+model Item {
+  id        String            @id @default(cuid())
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  itemName  String?
+  itemType  EnumItemItemType?
+}
+
+model ClickEvent {
+  id         String    @id @default(cuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  clickCount Int?
+  clickedAt  DateTime?
+  user       User?     @relation(fields: [userId], references: [id])
+  userId     String?
+}
+
+model User {
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  firstName   String?
+  lastName    String?
+  username    String        @unique
+  email       String?       @unique
+  password    String
+  roles       Json
+  totalClicks Int?
+  lastLogin   DateTime?
+  scores      Score[]
+  clickEvents ClickEvent[]
+  role        EnumUserRole?
+}
+
+enum EnumItemItemType {
+  Option1
+}
+
+enum EnumUserRole {
+  Option1
+}
